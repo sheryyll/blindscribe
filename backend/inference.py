@@ -1,8 +1,5 @@
 """
 Loads the exported ONNX model once and exposes a simple predict_char() API.
-
-Kept deliberately framework-light: the backend depends on onnxruntime, not
-torch, so the served container stays small and starts fast.
 """
 
 import json

@@ -1,13 +1,3 @@
-"""
-Grad-CAM explainability for a single character crop.
-
-This is intentionally kept separate from inference.py: the main prediction
-path uses ONNX Runtime for a small, fast-starting service, but Grad-CAM
-needs gradients, so it loads the original torch checkpoint directly. This
-module is only imported/used by the /explain endpoint, so a deployment that
-doesn't need explainability can skip installing torch entirely.
-"""
-
 import sys
 from pathlib import Path
 

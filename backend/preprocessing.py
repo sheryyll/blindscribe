@@ -1,26 +1,3 @@
-"""
-Shared preprocessing for a single character crop.
-
-CRITICAL: this exact function must be used both when preparing EMNIST
-training data (see model/dataset.py) and when preparing segmented canvas
-crops at inference time (see inference.py). Any divergence here is the
-classic "train/serve skew" bug that makes a model that scores 98% offline
-perform badly on real user input.
-
-EMNIST images are:
-  - 28x28 grayscale
-  - centered on the character's bounding box
-  - normalized to mean ~0.1307, std ~0.3081 (same convention as MNIST)
-  - stored with a fixed rotation/flip quirk (see NOTE below)
-
-Raw canvas crops are:
-  - arbitrary size, black strokes on white (or transparent) background
-  - not centered, not size-normalized
-
-This module converts either source into the same canonical 28x28 float
-array before it touches the model.
-"""
-
 import numpy as np
 from PIL import Image, ImageOps
 

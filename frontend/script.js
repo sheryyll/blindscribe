@@ -1,9 +1,3 @@
-// When this page is served BY the FastAPI backend itself (the recommended
-// deployment - see the StaticFiles mount at the bottom of backend/app.py),
-// API calls are same-origin, so a relative path ("" + "/predict") is
-// correct and there's nothing to configure. The only case that needs an
-// explicit host is opening this HTML file directly from disk (file://)
-// during local development, where there's no server for the page itself.
 const API_BASE = window.location.protocol === "file:" ? "http://localhost:8000" : "";
 const LOW_CONFIDENCE_THRESHOLD = 0.6;
 const PLACEHOLDER_TILE_COUNT = 8;
@@ -32,9 +26,7 @@ const overallConfidenceValue = document.getElementById("overall-confidence-value
 const overallConfidenceLabel = document.getElementById("overall-confidence-label");
 const thicknessButtons = document.querySelectorAll(".dot-btn");
 
-// Palette constants - must match the CSS custom properties in style.css.
-// Kept as plain values here (not read from CSS) because canvas 2D
-// rendering needs literal color strings, not var() references.
+
 const CANVAS_BG = "#fbf7ec";   // --cream-2
 const INK_COLOR = "#23303a";  // --ink
 const GRID_LINE_COLOR = "rgba(147, 184, 201, 0.5)"; // --grid-line (placid blue tint)
@@ -45,19 +37,11 @@ let hasInk = false;
 let lastCharacters = [];
 let lastImageDataUrl = null;
 let lastImageElement = null;
-let currentLineWidth = 2; // thin default, matches the active "Thin" toolbar preset
-
-// Undo/redo: each entry is a snapshot of the canvas pixels PLUS the hasInk
-// flag at that point, captured right before a stroke (or a clear) happens.
+let currentLineWidth = 2; 
 let historyStack = [];
 let redoStack = [];
 
 function setupCanvas() {
-  // Background + guide lines are drawn directly on the canvas context
-  // (not as a CSS background-image) because the ink fill below is fully
-  // opaque and sits on top of any CSS background - a CSS-only approach
-  // would make the guide lines invisible the moment the canvas is
-  // painted, which was a real bug in the previous version.
   ctx.fillStyle = CANVAS_BG;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -81,7 +65,6 @@ function setupCanvas() {
 setupCanvas();
 renderPlaceholderTiles();
 
-// ---------- Drawing ----------
 
 function getPos(evt) {
   const rect = canvas.getBoundingClientRect();
@@ -158,7 +141,7 @@ canvas.addEventListener("touchstart", startDraw, { passive: false });
 canvas.addEventListener("touchmove", draw, { passive: false });
 canvas.addEventListener("touchend", endDraw);
 
-// ---------- Toolbar: thickness presets ----------
+// --------- Toolbar: thickness presets ----------
 
 thicknessButtons.forEach((btn) => {
   btn.addEventListener("click", () => {

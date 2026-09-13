@@ -1,36 +1,3 @@
-"""
-Segments a canvas image (one handwritten string, dark strokes on light
-background) into an ordered list of single-character crops.
-
-APPROACH
---------
-1. Binarize the image (threshold).
-2. Find connected components (8-connectivity) - each blob is a candidate
-   character or character-fragment.
-3. Merge fragments that belong to the same character:
-   - dotted characters (i, j): a small blob sitting above a taller blob,
-     horizontally overlapping -> merge into one character.
-   - stray tiny specks (< MIN_BLOB_AREA): dropped as noise, not merged.
-4. Sort remaining blobs left-to-right by bounding-box x-center to get
-   reading order.
-5. Crop each with a small margin and hand off to preprocessing.py.
-
-KNOWN FAILURE MODES (documented deliberately, not hidden)
------------------------------------------------------------
-- Touching/overlapping characters (fast cursive-style writing where letters
-  visually connect) will be under-segmented into one blob. This heuristic
-  assumes reasonably separated print-style characters, which is a
-  reasonable v1 constraint for a canvas-drawing use case - the frontend
-  prompts the user to write with gaps between characters.
-- A character that is itself naturally split into unconnected strokes
-  (rare in block print, more common in certain 'k', 'x' renderings with a
-  thin waist) may be over-segmented into two blobs. The dotted-character
-  merge only fires for the specific small-blob-above-tall-blob pattern, so
-  it won't accidentally merge two full-size blobs.
-- No rotation/skew correction - assumes roughly horizontal writing, which
-  matches a canvas UI where the string is written left-to-right in one line.
-"""
-
 from dataclasses import dataclass
 
 import numpy as np
@@ -92,32 +59,7 @@ def _find_blobs(mask: np.ndarray) -> list[CharBox]:
 
 
 def _merge_dotted_characters(boxes: list[CharBox]) -> list[CharBox]:
-    """
-    Merge a small blob (a dot, or a disconnected fragment like a serif or
-    crossbar drawn as a separate mouse stroke) with the taller blob it
-    actually belongs to, when they overlap horizontally.
-
-    SELECTION METRIC: overlap is measured as a FRACTION OF THE CANDIDATE'S
-    OWN WIDTH (overlap_px / candidate.width), not raw pixel overlap. This
-    matters because raw pixel overlap is biased toward wide candidates: a
-    fragment sitting between its own narrow parent stroke and a wide
-    neighboring letter can accumulate more raw overlap pixels against the
-    wide neighbor purely because the neighbor is wide, even when the
-    fragment barely clips its edge. Normalizing by the candidate's width
-    instead asks "what fraction of this candidate's own extent does the
-    fragment cover?" - a narrow true-parent stroke that's mostly or fully
-    beneath the fragment scores near 1.0, while a wide neighbor that's only
-    clipped at the edge scores low, regardless of its raw pixel count.
-
-    This was found empirically: a disconnected 'J' serif (drawn as its own
-    mouse stroke, not touching J's vertical stroke) was incorrectly merged
-    into a neighboring 'E' because E's width let it win on raw overlap
-    despite the serif's true parent stroke being directly beneath it.
-
-    A minimum overlap fraction (MIN_OVERLAP_FRACTION) is also required, so
-    a fragment with only incidental, weak overlap against any candidate is
-    left unmerged rather than forced onto the least-bad option.
-    """
+    
     if len(boxes) < 2:
         return boxes
 
@@ -169,11 +111,7 @@ def _merge_dotted_characters(boxes: list[CharBox]) -> list[CharBox]:
 
 
 def segment_characters(img: Image.Image) -> list[Image.Image]:
-    """
-    Full pipeline: image -> ordered list of single-character PIL crops
-    (mode 'L', white background, dark ink - same convention preprocessing.py
-    expects).
-    """
+    
     mask = _binary_mask(img)
     boxes = _find_blobs(mask)
     boxes = _merge_dotted_characters(boxes)

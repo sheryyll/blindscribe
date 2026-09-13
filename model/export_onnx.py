@@ -1,14 +1,3 @@
-"""
-Converts a trained checkpoint (.pt) into an ONNX model for serving.
-
-ONNX Runtime is used at serve time instead of full PyTorch so the backend
-container is smaller and inference startup is faster - the backend never
-needs torch installed.
-
-Usage:
-    python export_onnx.py --checkpoint ../backend/checkpoint.pt --out ../backend/model.onnx
-"""
-
 import argparse
 import json
 

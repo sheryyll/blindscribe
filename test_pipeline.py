@@ -1,24 +1,6 @@
-"""
-Quick end-to-end sanity check: renders text to an image (simulating
-handwriting), runs it through segmentation + classification, and prints
-the result. Useful for verifying the full pipeline works after training,
-without needing the browser frontend running.
-
-Run from the repo root:
-    python test_pipeline.py "ABC"
-    python test_pipeline.py "Hi"
-
-Requires backend/model.onnx and backend/model_classes.json to already
-exist (see README: model/train.py then model/export_onnx.py).
-"""
-
 import sys
 from pathlib import Path
 
-# Make backend/ importable regardless of cwd - this script is the
-# "supported" way to run ad-hoc tests without hitting the relative-import
-# gotchas that come from mixing `from backend.x import y` (package-style)
-# with the flat sibling imports used inside backend/*.py (script-style).
 sys.path.insert(0, str(Path(__file__).parent / "backend"))
 
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402

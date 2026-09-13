@@ -1,17 +1,6 @@
-"""
-FastAPI backend for the handwriting sequence recognizer.
-
-Routes:
-    POST /predict   - full pipeline: image -> segmented, ordered characters
-                       -> classification -> assembled string
-    POST /explain    - Grad-CAM heatmap for a single character crop (used by
-                       the frontend when a user clicks a low-confidence
-                       character to see why the model was unsure)
-    GET  /health      - liveness check
-"""
-
 import base64
 import io
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -27,15 +16,20 @@ except ImportError:
     from inference import get_classifier
     from segmentation import segment_characters_with_boxes
 
-app = FastAPI(title="BlidScribe")
 
-# Permissive CORS: harmless here because in the recommended deployment the
-# frontend is served BY this same app (see the StaticFiles mount at the
-# bottom of this file), so requests are same-origin and CORS doesn't even
-# apply. This stays permissive only to also support opening frontend/*.html
-# directly as a local file:// during development. If you deploy the
-# frontend separately from this API, tighten allow_origins to that exact
-# domain instead of "*".
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    get_classifier()
+    try:
+        from .gradcam import get_explainer
+    except ImportError:
+        from gradcam import get_explainer
+    get_explainer()
+    yield
+
+
+app = FastAPI(title="BlidScribe", lifespan=lifespan)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -104,9 +98,6 @@ def predict(req: PredictRequest):
 
 @app.post("/explain")
 def explain(req: ExplainRequest):
-    # Imported lazily: gradcam.py depends on torch, which is heavier than
-    # the onnxruntime-only main prediction path. A deployment that doesn't
-    # need explainability never pays that import cost.
     try:
         from .gradcam import get_explainer
     except ImportError:
@@ -122,14 +113,6 @@ def explain(req: ExplainRequest):
     result = explainer.explain(crops[req.char_index])
     return result
 
-
-# ---------------------------------------------------------------------------
-# Serve the frontend from this same app, so the whole project is one
-# deployable service with no CORS and no second hosting target to manage.
-# Mounted LAST and at "/" so it only catches requests that didn't match one
-# of the API routes above. html=True makes it serve index.html for "/" and
-# resolves "/app.html", "/style.css", "/script.js" etc. by filename.
-# ---------------------------------------------------------------------------
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 if FRONTEND_DIR.is_dir():
     app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")

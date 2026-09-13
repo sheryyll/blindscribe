@@ -1,15 +1,3 @@
-"""
-Trains a small CNN on EMNIST Balanced and saves a checkpoint.
-
-Usage:
-    python train.py --epochs 8 --out ../backend/checkpoint.pt
-
-The model is intentionally small (three conv blocks) - this is a
-segmentation + pipeline project, not a "squeeze out the last 0.5%
-accuracy" project. A bigger model is a fine later upgrade but isn't
-where the interesting engineering is.
-"""
-
 import argparse
 
 import torch
