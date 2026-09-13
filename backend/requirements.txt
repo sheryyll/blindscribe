@@ -1,0 +1,13 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.6
+onnxruntime>=1.20.0
+pillow>=10.4.0
+numpy>=2.0.0
+scipy>=1.14.1
+pydantic>=2.9.2
+aiofiles>=23.2.1
+
+# Only needed for /explain (Grad-CAM) and for model/ scripts - not required
+# for the core /predict path if you only ship model.onnx.
+torch>=2.6.0
+torchvision>=0.21.0

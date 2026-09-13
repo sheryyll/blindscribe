@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlidScribe — Write</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="app-body">
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <span class="icon icon--brand">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+      </span>
+      <span class="brand__name">BlidScribe</span>
+    </a>
+  </header>
+
+  <main class="app-main">
+    <section class="hero">
+      <h1 class="hero__title">Write something</h1>
+      <p class="hero__subtitle">Use your mouse or trackpad to write. We'll read it and show the result below.</p>
+    </section>
+
+    <section class="canvas-toolbar-row">
+      <label class="size-control" for="size-select">
+        Canvas size
+        <select id="size-select">
+          <option value="small">Small</option>
+          <option value="medium" selected>Medium</option>
+          <option value="large">Large</option>
+        </select>
+      </label>
+    </section>
+
+    <div class="canvas-panel">
+      <canvas id="canvas" width="640" height="200"></canvas>
+
+      <div class="floating-toolbar">
+        <button class="tool-btn tool-btn--active" type="button" title="Pen (the only tool for now)" aria-pressed="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+        </button>
+
+        <div class="thickness-group" role="group" aria-label="Ink thickness">
+          <button class="dot-btn dot-btn--active" type="button" data-thickness="2" title="Thin"><span class="dot dot--sm"></span></button>
+          <button class="dot-btn" type="button" data-thickness="4" title="Medium"><span class="dot dot--md"></span></button>
+          <button class="dot-btn" type="button" data-thickness="7" title="Thick"><span class="dot dot--lg"></span></button>
+        </div>
+
+        <span class="toolbar-divider"></span>
+
+        <button id="undo-btn" class="icon-btn" type="button" title="Undo" disabled>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5" /><path d="M4 12h11a5 5 0 0 1 0 10h-1" /></svg>
+        </button>
+        <button id="redo-btn" class="icon-btn" type="button" title="Redo" disabled>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7l5 5-5 5" /><path d="M20 12H9a5 5 0 0 0 0 10h1" /></svg>
+        </button>
+        <button id="trash-btn" class="icon-btn" type="button" title="Clear canvas">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button id="clear-btn" class="btn btn--ghost" type="button">Clear</button>
+      <button id="predict-btn" class="btn btn--primary" type="button">Read it <span class="btn__arrow">→</span></button>
+    </div>
+
+    <p id="warning" class="warning" hidden></p>
+
+    <section class="recognition-card">
+      <h2 class="recognition-card__title">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8Z" /></svg>
+        </span>
+        Recognition
+      </h2>
+
+      <div class="recognition-card__body">
+        <div class="recognized-word-block">
+          <span class="field-label">Recognized word</span>
+          <div id="result-string" class="recognized-word recognized-word--empty">Your writing will appear here…</div>
+        </div>
+
+        <div class="chars-block">
+          <span class="field-label">Characters &amp; confidence</span>
+          <div id="result-chars" class="char-grid"></div>
+        </div>
+      </div>
+
+      <div class="recognition-card__footer">
+        <div class="overall-confidence">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z" /></svg>
+          </span>
+          Model confidence
+          <span id="overall-confidence-value" class="overall-confidence__value">–</span>
+          <span id="overall-confidence-label" class="overall-confidence__label"></span>
+        </div>
+        <div class="footer-hint">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><line x1="12" y1="11" x2="12" y2="16" /><circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none" /></svg>
+          </span>
+          Click a low-confidence character to see what the model focused on.
+        </div>
+      </div>
+
+      <div id="explain-panel" class="result__explain" hidden>
+        <p id="explain-caption" class="explain__label"></p>
+        <canvas id="heatmap-canvas" width="140" height="140"></canvas>
+        <p class="explain__legend">
+          <span class="legend-swatch legend-swatch--low"></span> little influence
+          <span class="legend-swatch legend-swatch--high"></span> strong influence
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

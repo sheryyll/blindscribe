@@ -1,0 +1,688 @@
+/*
+  BlidScribe design tokens
+  ------------------------
+  One shared palette used identically across the landing page AND the app
+  (canvas, toolbar, recognition panel) - three named colors plus the
+  neutral ink/background derivatives every real UI needs on top of them:
+
+    --cream        base background ("Cannoli Cream")
+    --cream-2      slightly lighter surface, for cards/panels sitting on
+                   top of --cream (canvas panel, recognition card, toolbar)
+    --placid       muted blue ("Placid Blue") - icons, dividers, the
+                   canvas's guide lines, secondary accents
+    --placid-deep  a darker, higher-contrast version of the same blue,
+                   used wherever placid blue needs to carry real text
+    --ink          dark charcoal (from the blue family) for body text
+    --ink-soft     muted secondary text
+    --merlot       deep wine red ("Merlot") - the one bold accent,
+                   doing double duty as both the primary action color
+                   (buttons) and the "pay attention" color (low
+                   confidence, warnings, the Grad-CAM heatmap) since the
+                   palette is deliberately limited to three named colors
+    --merlot-dark  hover state for merlot buttons
+    --highlight    light placid tint for a selected character tile
+                   (kept in-palette rather than introducing a fourth color)
+*/
+
+:root {
+  --cream: #f6efdd;
+  --cream-2: #fbf7ec;
+  --border: #e3d9be;
+  --ink: #23303a;
+  --ink-soft: #5c6c76;
+  --placid: #93b8c9;
+  --placid-deep: #3f6d82;
+  --merlot: #7a2140;
+  --merlot-dark: #5e1830;
+  --merlot-soft: rgba(122, 33, 64, 0.1);
+  --highlight: rgba(147, 184, 201, 0.4);
+  --grid-line: rgba(147, 184, 201, 0.5);
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+/* ---------- Topbar (shared between landing and app) ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--cream-2);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.brand__icon,
+.icon--brand {
+  color: var(--placid-deep);
+}
+
+/* ---------- Buttons (shared) ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 10px 22px;
+  border: 1px solid var(--merlot);
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.btn--ghost {
+  border-color: var(--border);
+  color: var(--ink);
+}
+
+.btn--ghost:hover {
+  background: rgba(30, 34, 43, 0.05);
+}
+
+.btn--primary {
+  background: var(--merlot);
+  border-color: var(--merlot);
+  color: #fdfdfc;
+}
+
+.btn--primary:hover {
+  background: var(--merlot-dark);
+  border-color: var(--merlot-dark);
+}
+
+.btn--small {
+  padding: 7px 16px;
+  font-size: 0.85rem;
+}
+
+.btn--large {
+  padding: 14px 30px;
+  font-size: 1.05rem;
+}
+
+.btn__arrow {
+  display: inline-block;
+}
+
+/* ---------- App page ---------- */
+
+.app-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.hero__title {
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.hero__subtitle {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.canvas-toolbar-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.size-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.size-control select {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--cream-2);
+  color: var(--ink);
+}
+
+.canvas-panel {
+  position: relative;
+  background: var(--cream-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0;
+  overflow: hidden;
+}
+
+#canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  aspect-ratio: 640 / 200;
+  cursor: crosshair;
+  touch-action: none;
+  background-color: #fbf7ec;
+  /* Guide lines and background fill are drawn directly on the canvas
+     context in script.js (see setupCanvas), not as a CSS background -
+     the opaque ink fill painted via the 2D context would otherwise
+     completely hide any CSS background-image underneath it. This
+     background-color is just the pre-paint fallback shown for an
+     instant before JS runs. */
+}
+
+.floating-toolbar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: calc(100% - 28px);
+  background: var(--cream-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  box-shadow: 0 4px 14px -8px rgba(30, 34, 43, 0.35);
+}
+
+@media (max-width: 480px) {
+  .floating-toolbar {
+    position: static;
+    justify-content: center;
+    border-radius: var(--radius);
+    margin: 10px;
+  }
+}
+
+.tool-btn,
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.tool-btn--active {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: rgba(30, 34, 43, 0.06);
+  color: var(--ink);
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.thickness-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dot-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dot-btn--active {
+  background: var(--cream);
+}
+
+.dot {
+  display: block;
+  border-radius: 50%;
+  background: var(--ink-soft);
+}
+
+.dot-btn--active .dot {
+  background: var(--ink);
+}
+
+.dot--sm {
+  width: 5px;
+  height: 5px;
+}
+
+.dot--md {
+  width: 8px;
+  height: 8px;
+}
+
+.dot--lg {
+  width: 11px;
+  height: 11px;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 2px;
+}
+
+.action-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.warning {
+  color: var(--merlot);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* ---------- Recognition card ---------- */
+
+.recognition-card {
+  background: var(--cream-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px 20px;
+  margin-top: 12px;
+}
+
+.recognition-card__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 20px;
+}
+
+.recognition-card__title .icon {
+  color: var(--merlot);
+}
+
+.recognition-card__body {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 28px;
+}
+
+@media (max-width: 640px) {
+  .recognition-card__body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.recognized-word {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 18px 16px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  min-height: 30px;
+}
+
+.recognized-word--empty {
+  font-weight: 400;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  border-style: dashed;
+}
+
+.char-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.char-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 48px;
+  font-family: inherit;
+}
+
+.char-tile--placeholder {
+  cursor: default;
+  color: var(--ink-soft);
+}
+
+.char-tile:hover:not(.char-tile--placeholder) {
+  border-color: var(--merlot);
+}
+
+.char-tile--selected {
+  background: var(--highlight);
+  border-color: var(--ink);
+}
+
+.char-tile__crop {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.char-tile__letter {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.char-tile__confidence {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.char-tile--low .char-tile__confidence {
+  color: var(--merlot);
+  font-weight: 500;
+}
+
+.recognition-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.overall-confidence {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overall-confidence .icon {
+  color: var(--placid-deep);
+}
+
+.overall-confidence__value {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.overall-confidence__label {
+  color: var(--ink-soft);
+}
+
+.footer-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------- Grad-CAM explain panel ---------- */
+
+.result__explain {
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.explain__label {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  margin: 0 0 10px;
+}
+
+.explain__legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 10px 0 0;
+}
+
+.legend-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--border);
+  margin-left: 10px;
+  border-radius: 3px;
+}
+
+.legend-swatch:first-child {
+  margin-left: 0;
+}
+
+.legend-swatch--low {
+  background: rgba(122, 33, 64, 0.15);
+}
+
+.legend-swatch--high {
+  background: rgba(122, 33, 64, 0.75);
+}
+
+#heatmap-canvas {
+  width: 140px;
+  height: 140px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  image-rendering: pixelated;
+}
+
+/* ==========================================================================
+   Landing page
+   --------------------------------------------------------------------------
+   Uses the same global palette tokens defined at :root above - no
+   separate color system, so the landing page and the app are guaranteed
+   to stay visually identical as the palette evolves.
+   ========================================================================== */
+
+.landing-body {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.landing-body h1,
+.landing-body h2 {
+  font-family: "Fraunces", serif;
+  font-optical-sizing: auto;
+}
+
+/* ---------- Nav ---------- */
+
+.l-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
+}
+
+.l-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+.l-brand__icon {
+  display: inline-flex;
+  color: var(--placid-deep);
+}
+
+/* ---------- Buttons ---------- */
+
+.l-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.l-btn--primary {
+  background: var(--merlot);
+  color: var(--cream-2);
+}
+
+.l-btn--primary:hover {
+  background: var(--merlot-dark);
+}
+
+.l-btn--small {
+  padding: 7px 16px;
+  font-size: 0.82rem;
+}
+
+.l-btn--large {
+  padding: 13px 26px;
+  font-size: 0.95rem;
+}
+
+.l-arrow {
+  display: inline-block;
+}
+
+/* ---------- Hero ---------- */
+
+.l-hero {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 100px 24px 56px;
+  text-align: center;
+}
+
+.l-eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--placid-deep);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 22px;
+}
+
+.l-hero__title {
+  font-size: clamp(2.4rem, 6vw, 3.6rem);
+  font-weight: 600;
+  line-height: 1.18;
+  margin: 0 0 24px;
+  color: var(--ink);
+}
+
+.l-hero__title--accent {
+  color: var(--merlot);
+}
+
+.l-hero__subtitle {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  max-width: 56ch;
+  margin: 0 auto 36px;
+}
+
+.l-hero__actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .icon-btn {
+    transition: none;
+  }
+}

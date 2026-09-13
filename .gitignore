@@ -1,0 +1,34 @@
+model/data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets files (not currently used by this project, but
+# standard practice to exclude preemptively so a future API key or config
+# file never gets committed by accident)
+.env/
+.env.local
+*.local
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Jupyter (not currently used, harmless to have ready)
+.ipynb_checkpoints/
+
+# Docker
+*.pid
